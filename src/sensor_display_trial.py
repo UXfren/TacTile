@@ -226,7 +226,11 @@ class BlobToMIDIConverter:
             distance = rel_x - initial_rel_x
 
             # Apply a quadratic curve: subtle near 0, steeper near edges
-            curved_distance = distance ** 1  # Cubic curve for more subtle start
+
+            curved_distance = distance ** cv2.getTrackbarPos(
+                "Pitch Curve", "Sensor Matrix")
+
+            # curved_distance = distance ** 7  # Cubic curve for more subtle start
 
             pitch_bend = int(curved_distance * 2 * pitch_bend_per_semitone)
 
@@ -368,16 +372,26 @@ def initialize_blob_detector():
 
     '''Filter by Area'''
 
-    params.filterByArea = False
+    params.filterByArea = True
 
     params.minArea = cv2.getTrackbarPos("Area Min", "Sensor Matrix")
     params.maxArea = cv2.getTrackbarPos("Area Max", "Sensor Matrix")
 
     '''------------------------------------------------------------------------'''
 
-    '''Other Control Toggles'''
+    '''Filter by Circularity'''
 
     params.filterByCircularity = False
+
+    params.minCircularity = 0.4  # Adjust this value as needed
+
+    # params.minCircularity = cv2.getTrackbarPos("Circ Min", "Sensor Matrix")
+    # params.maxCircularity = cv2.getTrackbarPos("Circ Max", "Sensor Matrix")
+
+    '''------------------------------------------------------------------------'''
+
+    '''Other Control Toggles'''
+
     params.filterByConvexity = False
     params.filterByInertia = False
 
@@ -402,8 +416,10 @@ def create_trackbars():
     # cv2.namedWindow("Controls", cv2.WINDOW_NORMAL)
     cv2.createTrackbar("Thresh Min", "Sensor Matrix", 10, 20, nothing)
     cv2.createTrackbar("Thresh Max", "Sensor Matrix", 255, 255, nothing)
-    cv2.createTrackbar("Area Min", "Sensor Matrix", 15, 1000, nothing)
-    cv2.createTrackbar("Area Max", "Sensor Matrix", 500, 5000, nothing)
+    cv2.createTrackbar("Area Min", "Sensor Matrix", 120, 1000, nothing)
+    cv2.createTrackbar("Area Max", "Sensor Matrix", 12000, 15000, nothing)
+
+    cv2.createTrackbar("Pitch Curve", "Sensor Matrix", 7, 10, nothing)
 
 
 def overlay_note_grid(display_img, note_grid, padding_offet, active_notes, alpha=0.5):
@@ -540,6 +556,8 @@ if __name__ == '__main__':
         threshold_max = cv2.getTrackbarPos("Thresh Max", "Sensor Matrix")
         area_min = cv2.getTrackbarPos("Area Min", "Sensor Matrix")
         area_max = cv2.getTrackbarPos("Area Max", "Sensor Matrix")
+        circularity_min = cv2.getTrackbarPos("Circ Min", "Sensor Matrix")
+        circularity_max = cv2.getTrackbarPos("Circ Max", "Sensor Matrix")
 
         # Update blob detector parameters
         detector = initialize_blob_detector()

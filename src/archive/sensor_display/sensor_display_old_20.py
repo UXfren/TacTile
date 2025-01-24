@@ -219,19 +219,13 @@ class BlobToMIDIConverter:
         rel_y = (grid_y % cell_height) / cell_height
 
         if col == start_col:
-            # Manual Vibrato with Non-Linear Curve
+            # Manual Vibrato: Map rel_x relative to initial_rel_x
             pitch_bend_per_semitone = 8192 // pitch_bend_range
+            pitch_bend = int((rel_x - initial_rel_x) *
+                             2 * pitch_bend_per_semitone)
 
-            # How far the blob has moved from its initial position
-            distance = rel_x - initial_rel_x
-
-            # Apply a quadratic curve: subtle near 0, steeper near edges
-            curved_distance = distance ** 7  # Cubic curve for more subtle start
-
-            pitch_bend = int(curved_distance * 2 * pitch_bend_per_semitone)
-
-            print(f"Manual Vibrato: rel_x={rel_x:.2f}, initial_rel_x={initial_rel_x:.2f}, "
-                  f"distance={distance:.2f}, curved_distance={curved_distance:.2f}, pitch_bend={pitch_bend}")
+            print(f"Manual Vibrato: rel_x={rel_x:.2f}, initial_rel_x={
+                  initial_rel_x:.2f}, pitch_bend={pitch_bend}")
         else:
             # Note Bend: Calculate based on horizontal movement to a new block
             note_diff = col - start_col
